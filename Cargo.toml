@@ -1,0 +1,12 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+authors = ["valkyrie_pilot <valk@randomairborne.dev>"]
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+axum = { version = "0.5", features = ["ws"] }
+serde = { version = "1", features = ["derive"] }
+scylla = "0.4.7"
+redis = { version = "0.21", features = ["aio", "r2d2", "cluster", "tokio-comp"], default-features = false }
