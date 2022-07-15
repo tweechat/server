@@ -1,0 +1,23 @@
+name: Check build
+
+on:
+    on: [push, pull_request]:
+        paths-ignore:
+            - "**.md"
+        branches:
+            - '**'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   uses: actions-rs/toolchain@v1
+                with:
+                    profile: minimal
+                    toolchain: nightly
+                    override: true
+
+            -   name: Check
+                run: cargo check
