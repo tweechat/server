@@ -1,11 +1,11 @@
 name: Check build
 
 on:
-    on: [push, pull_request]:
-        paths-ignore:
-            - "**.md"
-        branches:
-            - '**'
+  [push, pull_request]:
+      paths-ignore:
+          - "**.md"
+      branches:
+          - '**'
 
 jobs:
     build:
