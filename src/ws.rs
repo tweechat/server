@@ -10,7 +10,7 @@ use crate::State;
 
 #[allow(clippy::unused_async)]
 pub async fn upgrade(ws: WebSocketUpgrade, state: State) -> Response {
-    ws.on_upgrade(move |socket| async { handle_socket(socket, state) })
+    ws.on_upgrade(move |socket| async { handle_socket(socket, state).await })
 }
 
 async fn handle_socket(mut socket: WebSocket, state: State) {

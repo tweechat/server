@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     routing::{get, post},
     Router,
@@ -9,10 +11,16 @@ pub fn app(state: State) -> Router {
     Router::new()
         .route(
             "/:channelid/send",
-            post(move |path, json| async { crate::message::sendmsg(path, json, state).await }),
+            post(move |path, json| async {
+                let state = Arc::clone(&state);
+                crate::message::sendmsg(path, json, state).await
+            }),
         )
         .route(
             "/ws",
-            get(move |ws| async { crate::ws::upgrade(ws, state) }),
+            get(move |ws| async {
+                let state = Arc::clone(&state);
+                crate::ws::upgrade(ws, state).await
+            }),
         )
 }

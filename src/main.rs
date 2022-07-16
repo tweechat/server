@@ -2,6 +2,7 @@ use redis::aio::AsyncStream;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
+mod crypt;
 mod message;
 mod routes;
 mod ws;
