@@ -11,4 +11,4 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1"}
 scylla = { version = "0.4.7" }
 pgp = { version = "0.8" }
-redis = { version = "0.21", features = ["aio", "r2d2", "cluster", "tokio-comp"], default-features = false }
+redis = { version = "0.21", features = ["aio", "r2d2", "cluster", "tokio-comp", "connection-manager"], default-features = false }
