@@ -1,4 +1,5 @@
 use redis::aio::AsyncStream;
+use redis_subscribe::RedisSub;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -21,7 +22,7 @@ pub type State = Arc<Connections>;
 
 pub struct Connections {
     pub redis: redis::aio::Connection<std::pin::Pin<Box<dyn AsyncStream + Send + Sync>>>,
-    // pub scylla: scylla::Session,
+    pub subscriber: Arc<RedisSub>, // pub scylla: scylla::Session,
 }
 
 async fn get_state() -> Connections {
@@ -35,6 +36,7 @@ async fn get_state() -> Connections {
             .get_async_connection()
             .await
             .unwrap(),
+        subscriber: Arc::new(RedisSub::new("localhost:6379")),
         /* scylla: scylla::SessionBuilder::new()
         .known_nodes(&scylla_locations)
         .build()
