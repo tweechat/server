@@ -21,13 +21,13 @@ pub type State = Arc<Connections>;
 
 pub struct Connections {
     pub redis: redis::aio::Connection<std::pin::Pin<Box<dyn AsyncStream + Send + Sync>>>,
-    pub scylla: scylla::Session,
+    // pub scylla: scylla::Session,
 }
 
 async fn get_state() -> Connections {
     let redis_location = std::env::var("REDIS").expect("REDIS environment variable expected!");
-    let scylla_var = std::env::var("SCYLLA").expect("SCYLLA environment variable expected!");
-    let scylla_locations = scylla_var.split(' ').collect::<Vec<&str>>();
+    // let scylla_var = std::env::var("SCYLLA").expect("SCYLLA environment variable expected!");
+    // let scylla_locations = scylla_var.split(' ').collect::<Vec<&str>>();
 
     Connections {
         redis: redis::Client::open(format!("redis://{}", redis_location))
@@ -35,10 +35,10 @@ async fn get_state() -> Connections {
             .get_async_connection()
             .await
             .unwrap(),
-        scylla: scylla::SessionBuilder::new()
-            .known_nodes(&scylla_locations)
-            .build()
-            .await
-            .unwrap(),
+        /* scylla: scylla::SessionBuilder::new()
+        .known_nodes(&scylla_locations)
+        .build()
+        .await
+        .unwrap(),*/
     }
 }

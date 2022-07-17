@@ -1457,6 +1457,7 @@ dependencies = [
  "redis",
  "scylla",
  "serde",
+ "serde_json",
  "tokio",
 ]
 

@@ -14,15 +14,10 @@ pub async fn upgrade(ws: WebSocketUpgrade, state: State) -> Response {
 }
 
 async fn handle_socket(mut socket: WebSocket, state: State) {
-    while let Some(msg) = socket.recv().await {
-        let msg = if let Ok(msg) = msg {
-            if msg.to_text().unwrap_or("disconnect").contains("disconnect") {}
-        } else {
-            // client disconnected
-            return;
-        };
-
-        if socket.send(Message::Text("".to_string())).await.is_err() {
+    socket.send(Message::Text("Connected".to_string()));
+    loop {
+        redis
+        if socket.send(msg).await.is_err() {
             // client disconnected
             return;
         }

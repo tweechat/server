@@ -11,16 +11,16 @@ pub fn app(state: State) -> Router {
     Router::new()
         .route(
             "/:channelid/send",
-            post(move |path, json| async {
+            post({
                 let state = Arc::clone(&state);
-                crate::message::sendmsg(path, json, state).await
+                move |path, json| crate::message::sendmsg(path, json, Arc::clone(&state))
             }),
         )
         .route(
             "/ws",
-            get(move |ws| async {
+            get({
                 let state = Arc::clone(&state);
-                crate::ws::upgrade(ws, state).await
+                move |ws| crate::ws::upgrade(ws, Arc::clone(&state))
             }),
         )
 }
