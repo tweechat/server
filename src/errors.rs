@@ -8,18 +8,22 @@ pub enum Error {
     #[error("Redis Error: {}", self)]
     Redis(#[from] redis::RedisError),
     #[error("ScyllaDB Transport Error: {}", self)]
-    Scylla(#[from] scylla::transport::errors::DbError),
+    ScyllaTrans(#[from] scylla::transport::errors::DbError),
+    #[error("ScyllaDB Query Error: {}", self)]
+    Scylla(#[from] scylla::transport::errors::QueryError),
+    #[error("ScyllaDB From Row Error: {}", self)]
+    ScyllaFromRow(#[from] scylla::cql_to_rust::FromRowError),
     #[error("Serde_Json Error: {}", self)]
     Json(#[from] serde_json::Error),
+    #[error("Invalid Credentials!")]
+    InvalidCredentials,
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let status = match self {
-            Error::RedisPool(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Scylla(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Json(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::InvalidCredentials => StatusCode::UNAUTHORIZED,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
         axum::response::Response::builder()
             .header(

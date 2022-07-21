@@ -2,7 +2,7 @@ use axum::{extract::Path, response::IntoResponse, Json};
 use deadpool_redis::redis::cmd;
 use serde::{Deserialize, Serialize};
 
-use crate::{ State, Error};
+use crate::{auth::User, Error, State};
 
 pub async fn sendmsg(
     Path(channelid): Path<String>,
@@ -21,9 +21,4 @@ pub async fn sendmsg(
 pub struct MessageCreate {
     pub contents: String,
     pub author: User,
-}
-#[derive(Deserialize, Serialize)]
-pub struct User {
-    pub id: u64,
-    pub name: String,
 }

@@ -9,14 +9,17 @@ use tokio_stream::StreamExt;
 
 use redis_subscribe::Message as rsm;
 
-use crate::State;
+use crate::{
+    auth::{authenticate, User},
+    Error, State,
+};
 
-#[allow(clippy::unused_async)]
-pub async fn upgrade(ws: WebSocketUpgrade, state: State) -> Response {
-    ws.on_upgrade(move |socket| async { handle_socket(socket, state).await })
+pub async fn upgrade(ws: WebSocketUpgrade, state: State) -> Result<Response, Error> {
+    let user = authenticate(auth, &state).await?;
+    Ok(ws.on_upgrade(move |socket| async { handle_socket(socket, user, state).await }))
 }
 
-async fn handle_socket(mut socket: WebSocket, state: State) {
+async fn handle_socket(mut socket: WebSocket, user: User, state: State) {
     socket
         .send(Message::Text("Connected".to_string()))
         .await
@@ -51,7 +54,7 @@ async fn handle_socket(mut socket: WebSocket, state: State) {
         }
         state
             .subscriber
-            .subscribe(format!("sends:{}",))
+            .subscribe(format!("sends:{}", user.id))
             .await
             .unwrap();
     });

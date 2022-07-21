@@ -1,3 +1,4 @@
+use deadpool_redis::Connection;
 #[warn(clippy::all, clippy::nursery, clippy::pedantic)]
 use redis_subscribe::RedisSub;
 use std::net::SocketAddr;
@@ -6,8 +7,8 @@ use std::sync::Arc;
 mod auth;
 mod errors;
 mod message;
-mod routes;
 mod migrations;
+mod routes;
 mod ws;
 
 #[tokio::main]
@@ -25,23 +26,33 @@ pub use errors::Error;
 pub type State = Arc<Connections>;
 
 pub struct Connections {
-    pub redis: deadpool_redis::Pool,
+    redis: deadpool_redis::Pool,
     pub subscriber: Arc<RedisSub>,
     pub scylla: scylla::Session,
 }
 
+impl Connections {
+    /// A sugar for state.redis.get().await
+    async fn redis(&self) -> Result<Connection, deadpool_redis::PoolError> {
+        self.redis.get().await
+    }
+}
+
 async fn get_state() -> Connections {
-    let redis_location = std::env::var("REDIS").expect("REDIS environment variable expected!");
+    let redis_location = format!(
+        "redis://{}/",
+        std::env::var("REDIS").expect("REDIS environment variable expected!")
+    );
     let scylla_var = std::env::var("SCYLLA").expect("SCYLLA environment variable expected!");
     let scylla_locations = scylla_var.split(' ').collect::<Vec<&str>>();
     let scylla = scylla::SessionBuilder::new()
-    .known_nodes(&scylla_locations)
-    .build()
-    .await
-    .unwrap();
+        .known_nodes(&scylla_locations)
+        .build()
+        .await
+        .unwrap();
     migrations::migrate(&scylla).await.unwrap();
     Connections {
-        redis: deadpool_redis::Config::from_url("redis://127.0.0.1/")
+        redis: deadpool_redis::Config::from_url(&redis_location)
             .create_pool(Some(deadpool_redis::Runtime::Tokio1))
             .unwrap(),
 
