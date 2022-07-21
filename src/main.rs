@@ -1,9 +1,11 @@
+#![warn(clippy::all, clippy::nursery, clippy::pedantic)]
+
 use deadpool_redis::Connection;
-#[warn(clippy::all, clippy::nursery, clippy::pedantic)]
 use redis_subscribe::RedisSub;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
+mod account;
 mod auth;
 mod errors;
 mod message;
@@ -11,10 +13,13 @@ mod migrations;
 mod routes;
 mod ws;
 
+/// Main
+/// # Panics
+/// Panics if the address is unavaliable
 #[tokio::main]
 pub async fn main() {
     let addr: SocketAddr = ([0, 0, 0, 0], 8080).into();
-    let app = routes::app(Arc::new(get_state().await));
+    let app = routes::app(&Arc::new(get_state().await));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -51,11 +56,11 @@ async fn get_state() -> Connections {
         .await
         .unwrap();
     migrations::migrate(&scylla).await.unwrap();
+    let redis = deadpool_redis::Config::from_url(&redis_location)
+        .create_pool(Some(deadpool_redis::Runtime::Tokio1))
+        .unwrap();
     Connections {
-        redis: deadpool_redis::Config::from_url(&redis_location)
-            .create_pool(Some(deadpool_redis::Runtime::Tokio1))
-            .unwrap(),
-
+        redis,
         subscriber: Arc::new(RedisSub::new(&redis_location)),
         scylla,
     }

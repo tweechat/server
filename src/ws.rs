@@ -3,7 +3,9 @@ use axum::{
         ws::{Message, WebSocket},
         WebSocketUpgrade,
     },
+    headers::{authorization::Bearer, Authorization},
     response::Response,
+    TypedHeader,
 };
 use tokio_stream::StreamExt;
 
@@ -14,7 +16,11 @@ use crate::{
     Error, State,
 };
 
-pub async fn upgrade(ws: WebSocketUpgrade, state: State) -> Result<Response, Error> {
+pub async fn upgrade(
+    ws: WebSocketUpgrade,
+    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+    state: State,
+) -> Result<Response, Error> {
     let user = authenticate(auth, &state).await?;
     Ok(ws.on_upgrade(move |socket| async { handle_socket(socket, user, state).await }))
 }
@@ -35,8 +41,8 @@ async fn handle_socket(mut socket: WebSocket, user: User, state: State) {
                 rsm::Message {
                     channel: _,
                     message,
-                } => message,
-                rsm::PatternMessage {
+                }
+                | rsm::PatternMessage {
                     pattern: _,
                     channel: _,
                     message,

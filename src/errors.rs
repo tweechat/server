@@ -17,12 +17,14 @@ pub enum Error {
     Json(#[from] serde_json::Error),
     #[error("Invalid Credentials!")]
     InvalidCredentials,
+    #[error("Invalid Server-Side System Time!")]
+    InvalidTime,
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let status = match self {
-            Error::InvalidCredentials => StatusCode::UNAUTHORIZED,
+            Self::InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
         axum::response::Response::builder()

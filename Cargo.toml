@@ -19,3 +19,4 @@ rand = { version = "0.8" }
 redis-subscribe = { version = "0.2.1" }
 redis = { version = "0.21" }
 deadpool-redis = { version = "0.10" }
+axum-macros = "0.2.3"
