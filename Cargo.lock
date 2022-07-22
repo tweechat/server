@@ -108,18 +108,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-macros"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6293dae2ec708e679da6736e857cf8532886ef258e92930f38279c12641628b8"
-dependencies = [
- "heck 0.4.0",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "base32"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -489,12 +477,6 @@ checksum = "6d621efb26863f0e9924c6ac577e8275e5e6b77455db64ffa6c65c904e9e132c"
 dependencies = [
  "unicode-segmentation",
 ]
-
-[[package]]
-name = "heck"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
 
 [[package]]
 name = "hermit-abi"
@@ -1092,7 +1074,6 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "axum",
- "axum-macros",
  "deadpool-redis",
  "rand",
  "redis",
@@ -1105,6 +1086,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "totp-rs",
+ "tweechat-datatypes",
 ]
 
 [[package]]
@@ -1190,7 +1172,7 @@ version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5bb0dc7ee9c15cea6199cde9a127fa16a4c5819af85395457ad72d68edc85a38"
 dependencies = [
- "heck 0.3.3",
+ "heck",
  "proc-macro2",
  "quote",
  "rustversion",
@@ -1478,6 +1460,15 @@ dependencies = [
  "thiserror",
  "url",
  "utf-8",
+]
+
+[[package]]
+name = "tweechat-datatypes"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f3e265e4d8044a51b011b2bbf32aa26d7846ae450b3964bd6a5132a8fd4bbed"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

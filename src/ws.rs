@@ -10,11 +10,9 @@ use axum::{
 use tokio_stream::StreamExt;
 
 use redis_subscribe::Message as rsm;
+use tweechat_datatypes::User;
 
-use crate::{
-    auth::{authenticate, User},
-    Error, State,
-};
+use crate::{auth::authenticate, Error, State};
 
 pub async fn upgrade(
     ws: WebSocketUpgrade,

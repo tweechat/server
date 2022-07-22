@@ -7,15 +7,13 @@ use axum::{
 use deadpool_redis::redis::cmd;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tweechat_datatypes::User;
 
-use crate::{
-    auth::{authenticate, User},
-    Error, State,
-};
+use crate::{auth::authenticate, Error, State};
 
 pub async fn sendmsg(
     Path(channelid): Path<String>,
-    Json(mc): Json<IncomingMessageCreate>,
+    Json(mc): Json<tweechat_datatypes::MessageCreate>,
     TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
     state: State,
 ) -> Result<impl IntoResponse, Error> {
@@ -29,11 +27,6 @@ pub async fn sendmsg(
         .query_async(&mut conn)
         .await?;
     Ok(Json(json!({ "message": "message sent!"})))
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct IncomingMessageCreate {
-    pub contents: String,
 }
 
 #[derive(Deserialize, Serialize)]

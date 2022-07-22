@@ -4,15 +4,9 @@ use axum::headers::Authorization;
 use axum::{Json, TypedHeader};
 use redis::cmd;
 use scylla::IntoTypedRows;
-use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::Digest;
-
-#[derive(Serialize, Deserialize)]
-pub struct User {
-    pub id: i64,
-    pub name: String,
-}
+use tweechat_datatypes::User;
 
 pub async fn authenticate(
     auth: Authorization<Bearer>,
