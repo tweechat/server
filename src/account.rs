@@ -1,4 +1,4 @@
-use axum::{response::IntoResponse, Json};
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use sha2::Digest;
 use tweechat_datatypes::UserCreate;
 
@@ -10,6 +10,6 @@ pub async fn create(Json(uc): Json<UserCreate>, state: State) -> Result<impl Int
         .into_iter()
         .map(|x| format!("{:02x}", x))
         .collect::<String>();
-    state.scylla.query("INSERT INTO twee.users (username, email, password, salt, totp, privkey, pubkey) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (uc.name, uc.email, hashed_password, salt, "", uc.privkey, uc.pubkey, uc.security_level.to_string())).await?;
-    Ok("")
+    state.scylla.query("INSERT INTO twee.users (username, email, password, salt, totp, privkey, pubkey, security) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (uc.name, uc.email, hashed_password, salt, "", uc.privkey, uc.pubkey, uc.security_level.to_string())).await?;
+    Ok((StatusCode::NO_CONTENT, ""))
 }

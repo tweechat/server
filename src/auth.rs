@@ -4,9 +4,8 @@ use axum::headers::Authorization;
 use axum::{Json, TypedHeader};
 use redis::cmd;
 use scylla::IntoTypedRows;
-use serde_json::{json, Value};
 use sha2::Digest;
-use tweechat_datatypes::User;
+use tweechat_datatypes::{LoginResponse, TotpRequest, User};
 
 pub async fn authenticate(
     auth: Authorization<Bearer>,
@@ -22,23 +21,42 @@ pub async fn authenticate(
 pub async fn token(
     TypedHeader(auth): TypedHeader<Authorization<Basic>>,
     state: crate::State,
-) -> Result<Json<Value>, Error> {
+) -> Result<Json<LoginResponse>, Error> {
     let email = auth.username();
     let password = auth.password();
-    let (id, correct_email, username, correct_password, salt, _totp) = state
+    Ok(Json(gen_token(email, password, state).await?))
+}
+
+#[allow(clippy::unused_async)]
+pub async fn totp(
+    TypedHeader(_auth): TypedHeader<Authorization<Bearer>>,
+    Json(_totp): Json<TotpRequest>,
+    _state: crate::State,
+) -> Result<Json<LoginResponse>, Error> {
+    Ok(Json(LoginResponse {
+        token: "unimplemented".to_string(),
+        needs_totp: false,
+    }))
+}
+
+pub async fn gen_token(
+    email: &str,
+    password: &str,
+    state: crate::State,
+) -> Result<LoginResponse, Error> {
+    let (correct_email, username, correct_password_hash, salt, totp) = state
         .scylla
-        .query("SELECT id, email, username, password, salt, totp FROM", &[])
+        .query(
+            "SELECT email, username, password, salt, totp FROM twee.users WHERE email = ? ALLOW FILTERING",
+            (email,),
+        )
         .await?
         .rows
         .ok_or(Error::InvalidCredentials)?
-        .into_typed::<(i64, String, String, String, String, String)>()
+        .into_typed::<(String, String, String, String, String)>()
         .next()
         .ok_or(Error::InvalidCredentials)??;
     let provided_password_hash = sha2::Sha512::digest(&format!("{}|{}", salt, password))
-        .into_iter()
-        .map(|x| format!("{:02x}", x))
-        .collect::<String>();
-    let correct_password_hash = sha2::Sha512::digest(&format!("{}|{}", salt, correct_password))
         .into_iter()
         .map(|x| format!("{:02x}", x))
         .collect::<String>();
@@ -46,16 +64,23 @@ pub async fn token(
         return Err(Error::InvalidCredentials);
     };
     let token = randstr(64);
+    let needs_totp;
+    let redis_token = if totp.is_empty() {
+        needs_totp = false;
+        format!("token:{}", token)
+    } else {
+        needs_totp = true;
+        format!("token:totp:{}", token)
+    };
     let mut redis = state.redis.get().await?;
     cmd("SET")
-        .arg(format!("token:{}", token))
+        .arg(redis_token)
         .arg(serde_json::to_string(&User {
-            id,
             name: username.to_string(),
         })?)
         .query_async(&mut redis)
         .await?;
-    Ok(Json(json!({ "token": token })))
+    Ok(LoginResponse { token, needs_totp })
 }
 
 #[must_use]

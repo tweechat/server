@@ -59,6 +59,7 @@ async fn get_state() -> Connections {
     let redis = deadpool_redis::Config::from_url(&redis_location)
         .create_pool(Some(deadpool_redis::Runtime::Tokio1))
         .unwrap();
+    println!("{:?}", redis.status());
     Connections {
         redis,
         subscriber: Arc::new(RedisSub::new(&redis_location)),

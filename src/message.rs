@@ -6,7 +6,6 @@ use axum::{
 };
 use deadpool_redis::redis::cmd;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use tweechat_datatypes::User;
 
 use crate::{auth::authenticate, Error, State};
@@ -26,7 +25,7 @@ pub async fn sendmsg(
         .arg(&[format!("sends:{}", channelid), serde_json::to_string(&imc)?])
         .query_async(&mut conn)
         .await?;
-    Ok(Json(json!({ "message": "message sent!"})))
+    Ok("")
 }
 
 #[derive(Deserialize, Serialize)]

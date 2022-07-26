@@ -8,23 +8,33 @@ use axum::{
 use crate::State;
 
 pub fn app(state: &State) -> Router {
-    Router::new()
+    let auth = Router::new()
         .route(
-            "/auth/new",
-            get({
-                let state = Arc::clone(state);
-                move |json| crate::account::create(json, Arc::clone(&state))
-            }),
-        )
-        .route(
-            "/auth/token",
+            "/token",
             get({
                 let state = Arc::clone(state);
                 move |auth| crate::auth::token(auth, Arc::clone(&state))
             }),
         )
         .route(
-            "/:channelid/send",
+            "/totp",
+            post({
+                let state = Arc::clone(state);
+                move |auth, json| crate::auth::totp(auth, json, Arc::clone(&state))
+            }),
+        );
+    let account = Router::new().route(
+        "/create",
+        post({
+            let state = Arc::clone(state);
+            move |json| crate::account::create(json, Arc::clone(&state))
+        }),
+    );
+    Router::new()
+        .nest("/auth", auth)
+        .nest("/account", account)
+        .route(
+            "/:username/send",
             post({
                 let state = Arc::clone(state);
                 move |path, json, auth| {

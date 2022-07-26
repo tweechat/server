@@ -58,7 +58,7 @@ async fn handle_socket(mut socket: WebSocket, user: User, state: State) {
         }
         state
             .subscriber
-            .subscribe(format!("sends:{}", user.id))
+            .subscribe(format!("sends:{}", user.name))
             .await
             .unwrap();
     });

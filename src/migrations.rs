@@ -6,7 +6,7 @@ pub async fn migrate(scylla: &scylla::Session) -> Result<(), Box<dyn std::error:
     .await?;
     scylla
         .query(
-            "CREATE TABLE IF NOT EXISTS twee.users (username text primary key, email text, password text, salt text, totp text, privkey text, pubkey text, securitylevel text)",
+            "CREATE TABLE IF NOT EXISTS twee.users (username text primary key, email text, password text, salt text, totp text, privkey text, pubkey text, security text)",
             &[],
         )
         .await?;

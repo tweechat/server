@@ -27,6 +27,7 @@ impl IntoResponse for Error {
             Self::InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
+        println!("Error: {:?}", self);
         axum::response::Response::builder()
             .header(
                 axum::http::header::CONTENT_TYPE,
